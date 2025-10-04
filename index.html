@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Komil Sultonov — WOW Portfolio</title>
+  <meta name="description" content="Портал проектов Komil Sultonov: стекломорфизм × неон, 3D‑фон, плавная навигация, превью проектов, музыка, пресеты тем. Языки: RU / EN / UZ." />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg-1: #0a0a12;
+      --bg-2: #0d0a1f;
+      --neon-1: #00f5ff;
+      --neon-2: #7a5cff;
+      --neon-3: #ff3df5;
+      --glass-bg: rgba(255,255,255,0.06);
+      --glass-brd: rgba(255,255,255,0.20);
+      --txt: #e9f1ff;
+      --muted: #a9b3c7;
+      --shadow-neon: 0 0 12px rgba(0,245,255,.55), 0 0 32px rgba(122,92,255,.45), 0 0 56px rgba(255,61,245,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      color:var(--txt); background: radial-gradient(1200px 800px at 20% -10%, rgba(122,92,255,.20), transparent 60%), radial-gradient(900px 700px at 120% 20%, rgba(0,245,255,.20), transparent 60%), linear-gradient(180deg, var(--bg-2), var(--bg-1));
+      overflow-x:hidden;
+    }
+
+    /* 3D canvas behind everything */
+    #bg3d{position:fixed; inset:0; z-index:-1; display:block}
+
+    /* Animated glow orbs (kept subtle above 3D) */
+    .orb{position:fixed; inset:auto; width:42vmax; height:42vmax; filter:blur(60px); opacity:.25; mix-blend-mode:screen; pointer-events:none; z-index:0}
+    .orb:nth-child(1){top:-10vmax; left:-10vmax; background:radial-gradient(circle at 30% 30%, var(--neon-2), transparent 60%); animation: drift1 26s ease-in-out infinite alternate}
+    .orb:nth-child(2){bottom:-12vmax; right:-16vmax; background:radial-gradient(circle at 60% 60%, var(--neon-1), transparent 60%); animation: drift2 30s ease-in-out infinite alternate}
+    .orb:nth-child(3){top:30vh; left:50vw; background:radial-gradient(circle at 50% 50%, var(--neon-3), transparent 60%); animation: drift3 38s ease-in-out infinite alternate}
+    @keyframes drift1{to{transform:translate(8vmax,6vmax) rotate(20deg) scale(1.1)}}
+    @keyframes drift2{to{transform:translate(-6vmax,-4vmax) rotate(-16deg) scale(1.05)}}
+    @keyframes drift3{to{transform:translate(-10vmax,4vmax) rotate(12deg) scale(1.12)}}
+
+    /* Header */
+    header{position:sticky; top:0; z-index:6; padding:12px clamp(16px, 4vw, 48px); display:flex; align-items:center; justify-content:space-between; backdrop-filter:blur(10px) saturate(160%); -webkit-backdrop-filter:blur(10px) saturate(160%); background:linear-gradient(180deg, rgba(12,10,30,.65), rgba(12,10,30,.25)); border-bottom:1px solid rgba(255,255,255,.06)}
+    .brand{display:flex; align-items:center; gap:14px}
+    .badge{
+      width:42px; height:42px; border-radius:14px; background: linear-gradient(135deg, rgba(0,245,255,.2), rgba(122,92,255,.2));
+      border:1px solid var(--glass-brd); box-shadow: var(--shadow-neon);
+      display:grid; place-items:center; backdrop-filter: blur(8px) saturate(140%); -webkit-backdrop-filter: blur(8px) saturate(140%);
+    }
+    .badge svg{width:24px; height:24px}
+    .title{font-family: Orbitron, Inter, sans-serif; letter-spacing:.02em; font-weight:800; font-size: clamp(18px, 2.6vw, 26px); text-transform:uppercase}
+    nav{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+    .pill{ --c: var(--neon-1); padding:9px 12px; border-radius:999px; border:1px solid var(--glass-brd); background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06)); color:var(--txt); backdrop-filter: blur(10px) saturate(150%); -webkit-backdrop-filter: blur(10px) saturate(150%); text-decoration:none; font-weight:600; font-size:13px; box-shadow:0 0 0 0 rgba(0,0,0,0); transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease, background .25s ease; }
+    .pill:hover{ transform: translateY(-1px); box-shadow: 0 0 16px var(--c); border-color: rgba(255,255,255,.4) }
+    .pill.active{ box-shadow: 0 0 12px var(--c); }
+    .icon-pill{ width:42px; height:42px; display:grid; place-items:center; padding:0; font-size:22px; }
+    /* Improve visibility & hit area of the language icon */
+    #openLang{ background:linear-gradient(180deg, rgba(255,255,255,.28), rgba(255,255,255,.12)); border-color:rgba(255,255,255,.85); text-shadow:0 0 8px var(--neon-1), 0 0 16px var(--neon-2); }
+
+    /* Strong CTA order button */
+    .order-btn{ --c: var(--neon-3); padding:12px 16px; font-weight:900; letter-spacing:.02em; background:linear-gradient(135deg, rgba(255,61,245,.8), rgba(122,92,255,.8)); box-shadow:0 0 22px rgba(255,61,245,.65), 0 0 32px rgba(122,92,255,.45); border:1px solid rgba(255,255,255,.35) }
+    .order-btn:hover{ transform:translateY(-1px) scale(1.02); box-shadow:0 0 28px rgba(255,61,245,.85), 0 0 44px rgba(122,92,255,.65) }
+    @keyframes pulse{0%,100%{filter:drop-shadow(0 0 10px rgba(255,61,245,.6))}50%{filter:drop-shadow(0 0 18px rgba(122,92,255,.8))}}
+    .order-btn{ animation:pulse 2.6s ease-in-out infinite }
+
+    /* Hero */
+    .hero{position:relative; z-index:1; display:grid; place-items:center; padding: clamp(28px, 8vw, 100px) 24px 24px}
+    .hero-inner{max-width:1200px; width:100%; display:grid; grid-template-columns: 1fr; gap:14px; text-align:center}
+    .headline{font-family: Orbitron, Inter, sans-serif; font-weight:800; letter-spacing:.02em; font-size: clamp(36px, 7vw, 72px); line-height:1.05; margin:0 auto; text-shadow: 0 0 12px rgba(0,245,255,.6), 0 0 36px rgba(122,92,255,.45)}
+    .sub{max-width:820px; margin:0 auto; color:#f3f7ff; font-size: clamp(14px, 2.1vw, 18px); text-shadow: 0 2px 12px rgba(0,0,0,.55); background: linear-gradient(180deg, rgba(12,10,30,.42), rgba(12,10,30,.22)); border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:12px 14px; backdrop-filter: blur(10px) saturate(160%); -webkit-backdrop-filter: blur(10px) saturate(160%); }
+    .cta{margin-top:10px; display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap}
+    .cta .btn{ --c: var(--neon-2); padding:12px 16px; border-radius:14px; border:1px solid var(--glass-brd); background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04)); color:var(--txt); backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:10px; box-shadow: var(--shadow-neon); transition: transform .25s ease, box-shadow .25s ease, background .25s ease; }
+    .cta .btn:hover{ transform: translateY(-2px) scale(1.02); box-shadow: 0 0 24px var(--c), 0 0 48px rgba(0,0,0,.25)}
+
+    /* Controls */
+    .controls{position:sticky; top:64px; z-index:3; padding:8px clamp(16px,4vw,48px); backdrop-filter: blur(8px) saturate(160%); -webkit-backdrop-filter: blur(8px) saturate(160%); background: linear-gradient(180deg, rgba(12,10,30,.52), rgba(12,10,30,.22)); border-bottom:1px solid rgba(255,255,255,.06)}
+    .controls-inner{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:center}
+    .search{flex:1 1 320px; max-width:720px; position:relative}
+    .search input{width:100%; padding:14px 44px 14px 14px; border-radius:14px; border:1px solid var(--glass-brd); background:var(--glass-bg); color:var(--txt); outline:none; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);}    
+    .search .hint{position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:12px; color:var(--muted)}
+
+    /* Grid */
+    .wrap{max-width:1200px; margin: 22px auto; padding: 0 clamp(16px, 4vw, 48px)}
+    .grid{display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:18px}
+
+    .card{ position:relative; overflow:hidden; border-radius:20px; border:1px solid var(--glass-brd); background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04)); backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%); transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; cursor:pointer; min-height:260px; perspective: 1000px; }
+    .card:hover{ transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,.35), 0 0 28px rgba(122,92,255,.35)}
+    .thumb{position:relative; height:150px; overflow:hidden; border-bottom:1px solid rgba(255,255,255,.06)}
+    .thumb img{width:100%; height:100%; object-fit:cover; display:block; filter:saturate(120%) contrast(105%)}
+    .card::before{ content:""; position:absolute; inset:-2px; pointer-events:none; background: radial-gradient(600px 200px at var(--mx,50%) var(--my,0%), rgba(0,245,255,.25), transparent 40%), radial-gradient(600px 200px at calc(var(--mx,50%) - 20%) calc(var(--my,0%) + 20%), rgba(255,61,245,.20), transparent 40%); filter: blur(30px); opacity:.7; transition: opacity .2s ease }
+    .card:hover::before{opacity:1}
+    .card .body{padding:14px; display:flex; flex-direction:column; height:calc(100% - 0px)}
+    .card h3{margin:0 0 6px; font-size:18px; letter-spacing:.01em}
+    .desc{color:var(--muted); font-size:13.5px; line-height:1.45}
+    .tags{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px}
+    .tag{font-size:11.5px; padding:6px 8px; border-radius:999px; border:1px solid var(--glass-brd); background:rgba(255,255,255,.06)}
+    .goto{display:flex; justify-content:flex-end; margin-top:auto}
+    .goto a{--c: var(--neon-1); text-decoration:none; color:var(--txt); font-weight:800; border:1px solid var(--glass-brd); border-radius:12px; padding:10px 12px; background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06)); box-shadow:0 0 0 rgba(0,0,0,0); transition: box-shadow .25s ease, transform .25s ease}
+    .goto a:hover{box-shadow:0 0 14px var(--c); transform: translateY(-1px)}
+
+    footer{opacity:.95; color:var(--muted); text-align:center; padding:40px 16px}
+    footer a{ color:#fff; font-weight:700; text-decoration:none; border-bottom:1px dashed rgba(255,255,255,.65) }
+    footer a:hover{ filter: drop-shadow(0 0 8px rgba(255,255,255,.6)) }
+
+    /* Cursor glow */
+    .cursor{ position:fixed; pointer-events:none; width:22vmax; height:22vmax; left:0; top:0; transform:translate(-50%,-50%); z-index:2; mix-blend-mode:screen; filter: blur(40px); opacity:.55; background: radial-gradient(circle, rgba(0,245,255,.25) 0, rgba(122,92,255,.22) 35%, rgba(255,61,245,.20) 55%, transparent 70%); }
+
+    /* Modal */
+    .modal{position:fixed; inset:0; z-index:10; display:none; align-items:center; justify-content:center; background:radial-gradient(60vmax 60vmax at 50% 10%, rgba(122,92,255,.18), rgba(0,0,0,.65)); backdrop-filter: blur(6px)}
+    .modal.open{display:flex}
+    .modal .box{min-width:280px; max-width:520px; width:clamp(280px, 60vw, 500px); padding:16px; border-radius:18px; border:1px solid var(--glass-brd); background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04)); box-shadow: var(--shadow-neon)}
+    .modal .row{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
+    .modal .btn{flex:1 1 100px}
+
+    /* Design panel */
+    .panel{position:fixed; right:16px; bottom:16px; z-index:5; display:none}
+    .panel.open{display:block}
+    .panel .content{min-width:300px; padding:14px; border-radius:16px; border:1px solid var(--glass-brd); background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04)); backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); box-shadow: var(--shadow-neon)}
+    .section-title{font-weight:800; font-size:14px; opacity:.9}
+    .theme-grid{display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; margin-top:10px}
+    .theme{display:flex; align-items:center; gap:10px; padding:10px; border-radius:12px; border:1px solid var(--glass-brd); background:rgba(255,255,255,.06); cursor:pointer}
+    .sw{width:22px; height:22px; border-radius:6px; border:1px solid rgba(255,255,255,.3)}
+    .panel .row{display:flex; gap:8px; justify-content:flex-end; margin-top:12px; align-items:center}
+    .lock{display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--muted)}
+
+    /* Floating buttons */
+    .audio-pill{position:fixed; left:16px; bottom:16px; z-index:6}
+    .fab{ position:fixed; right:16px; bottom:16px; z-index:6; width:48px; height:48px; border-radius:999px; display:grid; place-items:center; font-size:22px; border:1px solid var(--glass-brd); background:linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06)); box-shadow: var(--shadow-neon); cursor:pointer }
+    .fab:hover{ transform: translateY(-1px); box-shadow:0 0 20px var(--neon-2) }
+
+    /* Anchor targets spacing so sticky header doesn't overlap */
+    section, .controls{scroll-margin-top:96px}
+
+    @media (prefers-reduced-motion: reduce){ .orb{animation:none} .card:hover{transform:none} .cta .btn:hover{transform:none} .cursor{display:none} }
+  </style>
+</head>
+<body>
+  <canvas id="bg3d"></canvas>
+
+  <!-- floating neon orbs for depth -->
+  <div class="orb"></div>
+  <div class="orb"></div>
+  <div class="orb"></div>
+
+  <header>
+    <div class="brand">
+      <div class="badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 2l2.6 6.4L21 9.2l-5 4.2 1.7 6.6L12 16.8 6.3 20l1.7-6.6-5-4.2 6.4-.8L12 2z" stroke="url(#g)" stroke-width="1.4"/>
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="24" y2="24">
+              <stop stop-color="#00F5FF"/>
+              <stop offset="1" stop-color="#7A5CFF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="title" id="brand">Komil Sultonov — Проекты</div>
+    </div>
+    <nav>
+      <a class="pill nav-link active" data-i18n="nav.projects" href="#projects">Проекты</a>
+      <a class="pill nav-link" data-i18n="nav.about" href="#about">О сайте</a>
+      <a class="pill order-btn" id="orderTop" href="https://t.me/Ka_yooo_ma" target="_blank" rel="noopener">🛒 Заказать</a>
+      <a class="pill icon-pill" id="openLang" aria-label="Language">🌐</a>
+    </nav>
+  </header>
+
+  <section class="hero" id="top">
+    <div class="hero-inner">
+      <h1 class="headline" id="headline">Портал проектов</h1>
+      <p class="sub" id="sub">Komil Sultonov — веб‑разработчик. Этот сайт — быстрый вход в мои проекты и стиль работы.</p>
+      <div class="cta">
+        <a class="btn nav-link" data-i18n="cta.open" href="#projects">🚀 Открыть галерею</a>
+        <a class="btn nav-link" data-i18n="cta.how" href="#about" style="--c: var(--neon-1)">ℹ️ Подробнее</a>
+        <a class="btn order-btn" id="orderHero" href="https://t.me/Ka_yooo_ma" target="_blank" rel="noopener" style="--c: var(--neon-3); font-weight:900">🛒 Заказать сайт</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="controls" id="projects">
+    <div class="controls-inner">
+      <div class="search">
+        <input id="search" type="search" placeholder="Поиск по названию, тегам, описанию…" autocomplete="off" />
+        <div class="hint" id="searchHint">⌘/Ctrl + K</div>
+      </div>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <div class="grid" id="grid" aria-live="polite"></div>
+  </main>
+
+  <section class="wrap" id="about">
+    <div class="card" role="region" aria-label="About">
+      <div class="body">
+        <h3 data-i18n="about.title">О сайте</h3>
+        <p class="desc" id="aboutText">Я делаю сайты с сильной эстетикой и вниманием к деталям. Здесь собраны мои работы; изучите примеры и выберите стиль, который ближе всего вашим задачам.</p>
+        <div class="tags">
+          <span class="tag">Responsive</span>
+          <span class="tag">Glass + Neon</span>
+          <span class="tag">3D</span>
+          <span class="tag">Previews</span>
+        </div>
+        <div class="goto">
+          <a class="toTop" href="#top" style="--c: var(--neon-3)" data-i18n="ui.up">Наверх ↑</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>© <span id="year"></span> · created by <a href="https://t.me/Ka_yooo_ma" target="_blank" rel="noopener">Sultonov Komil</a></footer>
+
+  <button class="pill audio-pill" id="audioBtn" aria-pressed="false">♪ Music</button>
+  <button class="fab" id="themeFab" aria-label="Design">🎨</button>
+  <div class="cursor" aria-hidden="true"></div>
+
+  <!-- Background track (user file) -->
+  <audio id="bgTrack" preload="auto" loop>
+    <source src="sandbox:/mnt/data/Yup-ft-Craft5man.m4a" type="audio/mp4" />
+    <source src="sandbox:/mnt/data/Yup-ft-Craft5man.m4a" type="audio/x-m4a" />
+    <source src="/mnt/data/Yup-ft-Craft5man.m4a" type="audio/mp4" />
+    <source src="Yup-ft-Craft5man.m4a" type="audio/mp4" />
+  </audio>
+
+  <!-- Language modal -->
+  <div class="modal" id="langModal" role="dialog" aria-modal="true" aria-labelledby="langTitle">
+    <div class="box">
+      <h3 id="langTitle">Выберите язык</h3>
+      <div class="row">
+        <a class="pill btn" data-lang="ru">Русский</a>
+        <a class="pill btn" data-lang="en">English</a>
+        <a class="pill btn" data-lang="uz">Oʻzbekcha</a>
+      </div>
+      <div class="row" style="justify-content:flex-end"><a class="pill" id="closeLang">OK</a></div>
+    </div>
+  </div>
+
+  <!-- Design panel (palettes + geometry + lock background) -->
+  <div class="panel" id="themePanel">
+    <div class="content">
+      <strong>🎨 <span id="designTitle">Дизайн</span></strong>
+
+      <div style="margin-top:10px" class="section-title" id="paletteTitle">Палитры</div>
+      <div class="theme-grid" id="themeGrid"></div>
+
+      <div style="margin-top:12px" class="section-title" id="geoTitle">Фигура</div>
+      <div class="theme-grid" id="geoGrid"></div>
+
+      <div class="row" style="justify-content:space-between">
+        <label class="lock"><input type="checkbox" id="lockBg"> <span id="lockBgLabel">Не менять фон</span></label>
+        <button class="pill" id="closeTheme">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- three.js -->
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+
+  <script>
+    // === TRANSLATIONS ===
+    const i18n = {
+      ru: {
+        brand: 'Komil Sultonov — Проекты',
+        nav: { projects: 'Проекты', about: 'О сайте' },
+        heroTitle: 'Портал проектов',
+        heroSub: 'Komil Sultonov — веб‑разработчик. Этот сайт — быстрый вход в мои проекты и стиль работы.',
+        cta: { open: '🚀 Открыть галерею', how: 'ℹ️ Подробнее', order: '🛒 Заказать', orderSite: '🛒 Заказать сайт' },
+        searchPh: 'Поиск по названию, тегам, описанию…',
+        searchHint: '⌘/Ctrl + K',
+        about: { title: 'О сайте', text: 'Я делаю сайты с сильной эстетикой и вниманием к деталям. Здесь собраны мои работы; изучите примеры и выберите стиль, который ближе всего вашим задачам.' },
+        ui: { theme: 'Тема', up: 'Наверх ↑', made: 'Создано', open: 'ОТКРЫТЬ →', langTitle: 'Выберите язык', music: 'Музыка', design:'Дизайн', palette:'Палитры', geometry:'Фигура', lockBg:'Не менять фон' }
+      },
+      en: {
+        brand: 'Komil Sultonov — Projects',
+        nav: { projects: 'Projects', about: 'About' },
+        heroTitle: 'Projects Portal',
+        heroSub: 'Komil Sultonov — web developer. This site is a quick entry to my projects and design approach.',
+        cta: { open: '🚀 Open gallery', how: 'ℹ️ More', order: '🛒 Order', orderSite: '🛒 Order a Site' },
+        searchPh: 'Search by title, tags, description…',
+        searchHint: '⌘/Ctrl + K',
+        about: { title: 'About', text: 'I build websites with strong aesthetics and attention to detail. Explore my work and pick the style that fits your goals.' },
+        ui: { theme: 'Theme', up: 'Up ↑', made: 'Created by', open: 'OPEN →', langTitle: 'Choose language', music: 'Music', design:'Design', palette:'Palettes', geometry:'Geometry', lockBg:'Keep background' }
+      },
+      uz: {
+        brand: 'Komil Sultonov — Loyihalar',
+        nav: { projects: 'Loyihalar', about: 'Sayt haqida' },
+        heroTitle: 'Loyihalar portali',
+        heroSub: 'Komil Sultonov — veb‑dasturchi. Bu sayt mening loyihalarim va uslubimga kirish uchun tez yoʻl.',
+        cta: { open: '🚀 Galereyani ochish', how: 'ℹ️ Batafsil', order: '🛒 Buyurtma', orderSite: '🛒 Sayt buyurtma qilish' },
+        searchPh: 'Sarlavha, teglar, tavsif bo‘yicha qidirish…',
+        searchHint: '⌘/Ctrl + K',
+        about: { title: 'Sayt haqida', text: 'Men kuchli estetika va aniqlik bilan saytlar quraman. Ishlarimni koʻring va maqsadingizga mos uslubni tanlang.' },
+        ui: { theme: 'Mavzu', up: 'Yuqoriga ↑', made: 'Muallif', open: 'OCHISH →', langTitle: 'Tilni tanlang', music: 'Musiqa', design:'Dizayn', palette:'Palitralar', geometry:'Geometriya', lockBg:'Fon o‘zgarmasin' }
+      }
+    };
+
+    let lang = localStorage.getItem('lang') || 'ru';
+
+    function applyLang(l){
+      lang = l; localStorage.setItem('lang', l); document.documentElement.lang = l;
+      const t = i18n[l];
+      document.getElementById('brand').textContent = t.brand;
+      document.querySelector('[data-i18n="nav.projects"]').textContent = t.nav.projects;
+      document.querySelector('[data-i18n="nav.about"]').textContent = t.nav.about;
+      document.getElementById('headline').innerHTML = t.heroTitle;
+      document.getElementById('sub').textContent = t.heroSub;
+      document.querySelector('[data-i18n="cta.open"]').textContent = t.cta.open;
+      document.querySelector('[data-i18n="cta.how"]').textContent = t.cta.how;
+      const s = document.getElementById('search'); s.placeholder = t.searchPh;
+      document.getElementById('searchHint').textContent = t.searchHint;
+      document.querySelector('[data-i18n="about.title"]').textContent = t.about.title;
+      document.getElementById('aboutText').textContent = t.about.text;
+      document.getElementById('langTitle').textContent = t.ui.langTitle;
+      document.getElementById('audioBtn').textContent = '♪ ' + t.ui.music;
+      document.getElementById('orderTop').textContent = t.cta.order;
+      document.getElementById('orderHero').textContent = t.cta.orderSite;
+      // Design panel captions
+      document.getElementById('designTitle').textContent = t.ui.design;
+      document.getElementById('paletteTitle').textContent = t.ui.palette;
+      document.getElementById('geoTitle').textContent = t.ui.geometry;
+      document.getElementById('lockBgLabel').textContent = t.ui.lockBg;
+      render();
+      document.querySelectorAll('.goto a.primary').forEach(a=> a.textContent = t.ui.open);
+    }
+
+    // === PROJECTS DATA ===
+    const projects = [
+      { title: 'Superlink', url: 'https://kayoooma.github.io/superlink', preview: '', desc: {ru:'Компактный хаб ссылок и быстрых переходов.', en:'Compact hub of links and quick jumps.', uz:'Havolalar va tez o‘tishlar uchun ixcham xab.'}, tags: ['links','tool','ui'], color: '#00f5ff' },
+      { title: 'Resume through VideoGame', url: 'https://kayoooma.github.io/resume-through-videogame/', preview: '', desc: {ru:'Резюме в формате мини‑видеоигры.', en:'Resume as a mini‑video game.', uz:'Mini‑o‘yin formatidagi rezyume.'}, tags: ['resume','game','creative'], color: '#ff3df5' },
+      { title: 'Uzum — Hire Me', url: 'https://kayoooma.github.io/uzum_hire_me/', preview: '', desc: {ru:'Креативная заявка для компании Uzum.', en:'Creative application for Uzum.', uz:'Uzum kompaniyasi uchun ijodiy ariza.'}, tags: ['promo','job','case'], color: '#7a5cff' },
+      { title: 'Project Manager', url: 'https://kayoooma.github.io/project_manager', preview: '', desc: {ru:'Лендинг проектного менеджера.', en:'Project Manager landing page.', uz:'Loyiha menejeri uchun landing.'}, tags: ['pm','portfolio'], color: '#00f5ff' },
+      { title: 'Project Boboy', url: 'https://kayoooma.github.io/project_boboy_site/', preview: '', desc: {ru:'Концепт и демонстрационный сайт.', en:'Concept and demo site.', uz:'Konsеpt va demo sayt.'}, tags: ['concept','landing'], color: '#7a5cff' },
+      { title: 'Project Manager — Vladislav', url: 'https://kayoooma.github.io/project_manager_Vladislav/', preview: '', desc: {ru:'Вариант портфолио ПМ от Владислава.', en:'PM portfolio variant by Vladislav.', uz:'Vladislavdan PM portfeli varianti.'}, tags: ['pm','portfolio'], color: '#ff3df5' },
+    ];
+
+    function shot(url){
+      const encoded = encodeURIComponent(url);
+      return `https://s.wordpress.com/mshots/v1/${encoded}?w=1200`;
+    }
+
+    // === RENDER CARDS ===
+    const grid = document.getElementById('grid');
+    const search = document.getElementById('search');
+    const state = { q: '' };
+
+    function cardTemplate(p){
+      const c = p.color || '#7a5cff';
+      const t = i18n[lang];
+      const img = p.preview && p.preview.trim() ? p.preview : shot(p.url);
+      return `
+        <article class="card" data-tags="${p.tags.join(',')}" tabindex="0" role="article" aria-label="${p.title}">
+          <div class="thumb"><img src="${img}" alt="${p.title} preview" referrerpolicy="no-referrer" loading="lazy"/></div>
+          <div class="body">
+            <h3>${p.title}</h3>
+            <p class="desc">${(p.desc && p.desc[lang]) || p.desc || ''}</p>
+            <div class="tags">${p.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+            <div class="goto">
+              <a class="primary" href="${p.url}" target="_blank" rel="noopener" aria-label="Open ${p.title}" style="--c:${c}">${t.ui.open}</a>
+            </div>
+          </div>
+        </article>`
+    }
+
+    function render(){
+      const q = state.q.toLowerCase();
+      const filtered = projects.filter(p=>{
+        const matchesQ = !q || [p.title, (p.desc && (p.desc[lang]||p.desc.ru||p.desc.en||'')), p.tags.join(' ')].join(' ').toLowerCase().includes(q);
+        return matchesQ;
+      });
+      grid.innerHTML = filtered.map(cardTemplate).join('');
+    }
+
+    render();
+
+    search.addEventListener('input', (e)=>{ state.q = e.target.value; render(); });
+
+    // Quick focus Ctrl/⌘+K
+    window.addEventListener('keydown', (e)=>{ if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); search.focus(); }});
+
+    // Neon cursor glow
+    const cursor = document.querySelector('.cursor');
+    let cx = window.innerWidth/2, cy = window.innerHeight/2, tx = cx, ty = cy;
+    function loop(){ cx += (tx - cx)*0.12; cy += (ty - cy)*0.12; cursor.style.transform = `translate(${cx}px, ${cy}px)`; requestAnimationFrame(loop) }
+    loop();
+    window.addEventListener('pointermove', (e)=>{ tx = e.clientX; ty = e.clientY });
+
+    // Reactive glow inside cards
+    grid.addEventListener('pointermove', (e)=>{
+      const card = e.target.closest('.card'); if(!card) return;
+      const r = card.getBoundingClientRect();
+      const mx = ((e.clientX - r.left) / r.width) * 100;
+      const my = ((e.clientY - r.top) / r.height) * 100;
+      card.style.setProperty('--mx', mx + '%');
+      card.style.setProperty('--my', my + '%');
+    });
+
+    // Card click opens link — with fallback if popup blocked
+    grid.addEventListener('click', (e)=>{
+      const link = e.target.closest('a');
+      if(link) return; // native anchor works
+      const card = e.target.closest('.card'); if(!card) return;
+      const title = card.querySelector('h3').textContent;
+      const p = projects.find(x=>x.title===title);
+      if(p){ const win = window.open(p.url, '_blank'); if(!win){ location.href = p.url; } }
+    });
+
+    // Footer year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // === Smooth nav & active state ===
+    function smoothTo(id){ const el = document.querySelector(id); if(!el) return; el.scrollIntoView({behavior:'smooth', block:'start'}); }
+    function setActiveNav(id){ document.querySelectorAll('a.nav-link').forEach(a=> a.classList.toggle('active', a.getAttribute('href')===id)); }
+    document.querySelectorAll('a.nav-link[href^="#"]').forEach(a=>{ a.addEventListener('click', (e)=>{ e.preventDefault(); const id = a.getAttribute('href'); smoothTo(id); setActiveNav(id); }); });
+    const sections = ['#projects','#about'];
+    const io = new IntersectionObserver((entries)=>{ entries.forEach(ent=>{ if(ent.isIntersecting){ setActiveNav('#'+ent.target.id); } }) }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
+    sections.forEach(s=>{ const el = document.querySelector(s); if(el) io.observe(el); });
+
+    // === Language modal ===
+    const langModal = document.getElementById('langModal');
+    document.getElementById('openLang').addEventListener('click', ()=> langModal.classList.add('open'));
+    document.getElementById('closeLang').addEventListener('click', ()=> langModal.classList.remove('open'));
+    langModal.addEventListener('click', (e)=>{ if(e.target===langModal) langModal.classList.remove('open'); });
+    langModal.querySelectorAll('[data-lang]').forEach(btn=> btn.addEventListener('click', ()=>{ applyLang(btn.dataset.lang); langModal.classList.remove('open'); }));
+
+    // Initialize language UI
+    applyLang(lang);
+
+    // === THREE.JS BACKGROUND ===
+    const canvas = document.getElementById('bg3d');
+    const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 100);
+    camera.position.z = 8;
+
+    function resize(){ const w = window.innerWidth, h = window.innerHeight; renderer.setSize(w,h,false); camera.aspect = w/h; camera.updateProjectionMatrix(); renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); }
+    resize(); window.addEventListener('resize', resize);
+
+    // Neon particle field
+    const starGeo = new THREE.BufferGeometry();
+    const COUNT = 900; const pos = new Float32Array(COUNT*3);
+    for(let i=0;i<COUNT;i++){ pos[i*3+0] = (Math.random()-0.5)*30; pos[i*3+1] = (Math.random()-0.5)*18; pos[i*3+2] = (Math.random()-0.5)*20; }
+    starGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const starMat = new THREE.PointsMaterial({ size: 0.035, transparent:true, depthWrite:false, blending: THREE.AdditiveBlending });
+    const stars = new THREE.Points(starGeo, starMat); scene.add(stars);
+
+    // Wireframe object (switchable)
+    let mesh = null; const lineMat = new THREE.LineBasicMaterial({ transparent:true, opacity:0.55 });
+    function setGeometry(type){ if(mesh){ scene.remove(mesh); mesh.geometry.dispose(); }
+      let geo; switch(type){ case 'torus': geo = new THREE.TorusGeometry(2.2, 0.6, 16, 100); break; case 'knot': geo = new THREE.TorusKnotGeometry(1.8, 0.5, 100, 16); break; case 'octa': geo = new THREE.OctahedronGeometry(2.4, 1); break; case 'sphere': geo = new THREE.SphereGeometry(2.4, 24, 18); break; default: geo = new THREE.IcosahedronGeometry(2.6, 1); }
+      const wire = new THREE.WireframeGeometry(geo); mesh = new THREE.LineSegments(wire, lineMat); scene.add(mesh); }
+
+    // Utility: luminance for visibility
+    function hexToRgb(h){ const m = h.trim().replace('#',''); const n = m.length===3? m.split('').map(c=>c+c).join(''):m; const r=parseInt(n.slice(0,2),16), g=parseInt(n.slice(2,4),16), b=parseInt(n.slice(4,6),16); return {r,g,b}; }
+    function luminance(hex){ const {r,g,b}=hexToRgb(hex); const sr=[r,g,b].map(v=>{v/=255; return v<=0.03928? v/12.92: Math.pow((v+0.055)/1.055,2.4)}); return 0.2126*sr[0]+0.7152*sr[1]+0.0722*sr[2]; }
+
+    function applyThemeTo3D(){
+      const s = getComputedStyle(document.documentElement);
+      const n1 = s.getPropertyValue('--neon-1').trim();
+      const n2 = s.getPropertyValue('--neon-2').trim();
+      const n3 = s.getPropertyValue('--neon-3').trim();
+      // particles — primary neon
+      starMat.color = new THREE.Color(n1);
+      // choose the most visible for wireframe
+      const candidates = [n3,n2,n1].sort((a,b)=> luminance(b)-luminance(a));
+      const chosen = candidates[0];
+      lineMat.color = new THREE.Color(chosen);
+      const L = luminance(chosen);
+      lineMat.opacity = L < 0.4 ? 0.9 : 0.6;
+    }
+
+    // Parallax from pointer
+    let pmx=0, pmy=0, ptx=0, pty=0;
+    window.addEventListener('pointermove', (e)=>{ pmx = (e.clientX/window.innerWidth - .5)*2; pmy = (e.clientY/window.innerHeight - .5)*2; });
+
+    function animate(){ ptx += (pmx - ptx)*0.04; pty += (pmy - pty)*0.04; stars.rotation.y += 0.0008; stars.rotation.x += 0.0003; if(mesh){ mesh.rotation.y += 0.0015; mesh.rotation.x += 0.0006; } camera.position.x = ptx*0.8; camera.position.y = -pty*0.4; camera.lookAt(0,0,0); renderer.render(scene, camera); requestAnimationFrame(animate); }
+    animate();
+
+    // Re-apply 3D colors when theme changes
+    const mo = new MutationObserver(applyThemeTo3D); mo.observe(document.documentElement, { attributes:true, attributeFilter:['style'] });
+
+    // === PALETTES & GEOMETRIES ===
+    const palettes = [
+      { id:'silver-violet', name:'Silver × Violet',   neon:['#C9CCD3','#7A5CFF','#FF3DF5'], bg:['#0d0a1f','#0a0a12'] },
+      { id:'black-white',  name:'Black × White',     neon:['#FFFFFF','#111111','#7A5CFF'], bg:['#0b0b0f','#07070a'] },
+      { id:'yellow-violet',name:'Yellow × Violet',   neon:['#FFD644','#7A5CFF','#111111'], bg:['#0c0a14','#090813'] },
+      { id:'black-gold',   name:'Black × Gold',      neon:['#F0C674','#0b0b0f','#FF3DF5'], bg:['#0b0b0f','#07070a'] },
+      { id:'black-silver', name:'Black × Silver',    neon:['#D9DEE8','#0b0b0f','#7A5CFF'], bg:['#0b0b0f','#07070a'] }
+    ];
+
+    const geos = [
+      { id:'icosa', name:'Icosa' },
+      { id:'octa',  name:'Octa' },
+      { id:'knot',  name:'Knot' },
+      { id:'torus', name:'Torus' },
+      { id:'sphere',name:'Sphere' }
+    ];
+
+    const themeGrid = document.getElementById('themeGrid');
+    const geoGrid = document.getElementById('geoGrid');
+    const lockBg = document.getElementById('lockBg');
+
+    function renderPalettes(){
+      themeGrid.innerHTML = palettes.map(p=>{
+        const [n1,n2,n3] = p.neon; return `<div class="theme" data-palette="${p.id}"><span class="sw" style="background:${n1}"></span><span class="sw" style="background:${n2}"></span><span class="sw" style="background:${n3}"></span><span style="font-size:13px">${p.name}</span></div>`;
+      }).join('');
+    }
+    function renderGeos(){
+      geoGrid.innerHTML = geos.map(g=> `<div class="theme" data-geo="${g.id}"><span class="sw" style="background:rgba(255,255,255,.85)"></span><span style="font-size:13px">${g.name}</span></div>`).join('');
+    }
+    renderPalettes();
+    renderGeos();
+
+    function applyPalette(paletteId){
+      const p = palettes.find(x=>x.id===paletteId) || palettes[0];
+      const [n1,n2,n3] = p.neon;
+      document.documentElement.style.setProperty('--neon-1', n1);
+      document.documentElement.style.setProperty('--neon-2', n2);
+      document.documentElement.style.setProperty('--neon-3', n3);
+      if(!lockBg.checked){
+        const [b2,b1] = p.bg; // keep gradient order consistent
+        document.documentElement.style.setProperty('--bg-1', b1);
+        document.documentElement.style.setProperty('--bg-2', b2);
+      }
+      localStorage.setItem('palettePreset', paletteId);
+      applyThemeTo3D();
+    }
+
+    function applyGeometry(geoId){
+      setGeometry(geoId);
+      localStorage.setItem('geoPreset', geoId);
+    }
+
+    document.getElementById('themeFab').addEventListener('click', ()=> document.getElementById('themePanel').classList.toggle('open'));
+    document.getElementById('closeTheme').addEventListener('click', ()=> document.getElementById('themePanel').classList.remove('open'));
+
+    themeGrid.addEventListener('click', (e)=>{ const el = e.target.closest('[data-palette]'); if(!el) return; applyPalette(el.dataset.palette); });
+    geoGrid.addEventListener('click',   (e)=>{ const el = e.target.closest('[data-geo]');     if(!el) return; applyGeometry(el.dataset.geo); });
+
+    // Persist lock background
+    lockBg.checked = localStorage.getItem('lockBg') === '1';
+    lockBg.addEventListener('change', ()=>{ localStorage.setItem('lockBg', lockBg.checked ? '1':'0'); });
+
+    // Initial presets
+    const savedPalette = localStorage.getItem('palettePreset');
+    const savedGeo = localStorage.getItem('geoPreset');
+    applyPalette(savedPalette || 'silver-violet');
+    applyGeometry(savedGeo || 'icosa');
+
+    // === Background music (file + first‑interaction autoplay) ===
+    const audioBtn = document.getElementById('audioBtn');
+    const bgTrack = document.getElementById('bgTrack');
+    let playing=false;
+
+    function tryAutoplay(){
+      if(playing) return;
+      bgTrack.volume = 0.5;
+      bgTrack.play().then(()=>{ playing=true; audioBtn.setAttribute('aria-pressed','true'); }).catch(()=>{});
+      window.removeEventListener('pointerdown', tryAutoplay);
+      window.removeEventListener('keydown', tryAutoplay);
+      window.removeEventListener('touchstart', tryAutoplay);
+    }
+    window.addEventListener('pointerdown', tryAutoplay, { once:false });
+    window.addEventListener('keydown', tryAutoplay, { once:false });
+    window.addEventListener('touchstart', tryAutoplay, { once:false });
+
+    audioBtn.addEventListener('click', ()=>{
+      if(!playing){ bgTrack.play().then(()=>{ playing=true; audioBtn.setAttribute('aria-pressed','true'); }); }
+      else { bgTrack.pause(); playing=false; audioBtn.setAttribute('aria-pressed','false'); }
+    });
+
+    // === SMOKE TESTS (dev) ===
+    (function tests(){
+      try{
+        console.group('%cSMOKE TESTS','color:#0ff');
+        console.assert(document.querySelectorAll('#grid .card').length >= 6, 'Cards rendered');
+        console.assert(!document.querySelector('.goto span'), 'Host text removed from cards');
+        console.assert(document.querySelectorAll('.goto a.primary').length === document.querySelectorAll('#grid .card').length, 'Each card has one OPEN button');
+        console.assert(typeof THREE !== 'undefined', 'THREE loaded');
+        console.assert(document.getElementById('bg3d') instanceof HTMLCanvasElement, '3D canvas exists');
+        console.assert(document.querySelector('#langModal'), 'Lang modal exists');
+        console.assert(document.querySelector('#themeGrid').children.length >= 4, 'Palettes rendered');
+        console.assert(document.querySelector('#geoGrid').children.length >= 3, 'Geometries rendered');
+        console.assert(document.querySelectorAll('.thumb img').length >= 6, 'Preview images rendered');
+        console.assert(document.querySelector('a.nav-link[href="#projects"]'), 'Nav link to #projects exists');
+        console.assert(document.getElementById('orderTop') && document.getElementById('orderHero'), 'Order buttons exist');
+        // Ensure wireframe visibility at Yellow×Violet
+        applyPalette('yellow-violet'); applyThemeTo3D();
+        console.assert(document.documentElement.style.getPropertyValue('--neon-1') !== '', 'Palette applied');
+        // Audio element
+        const a = document.getElementById('bgTrack'); console.assert(a && a.tagName==='AUDIO', 'Audio element exists');
+        console.groupEnd();
+        // restore saved presets
+        const sp = localStorage.getItem('palettePreset'); if(sp) applyPalette(sp);
+        const sg = localStorage.getItem('geoPreset'); if(sg) applyGeometry(sg);
+      }catch(err){ console.error('Smoke tests error', err); }
+    })();
+  </script>
+</body>
+</html>
